@@ -107,10 +107,7 @@ extension AppDelegate: CLLocationManagerDelegate {
             })
             authorizationAlert.addAction(acceptAction)
             
-            guard let window = self.window else {
-                return
-            }
-            guard let viewController = window.rootViewController else {
+            guard let window = self.window, let viewController = window.rootViewController else {
                 return
             }
             viewController.present(authorizationAlert, animated: true, completion: nil)
