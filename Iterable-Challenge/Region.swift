@@ -34,22 +34,6 @@ class Region: Object {
         return "id"
     }
     
-    func registerForLocationTriggeredNotification() {
-        let content = UNMutableNotificationContent()
-        content.body = "You are now at " + self.name
-        content.sound = UNNotificationSound.default()
-        
-        let trigger = UNLocationNotificationTrigger(region: self.circularRegionRepresentation, repeats: true)
-        
-        let notification = UNNotificationRequest(identifier: self.id, content: content, trigger: trigger)
-        let center = UNUserNotificationCenter.current()
-        center.add(notification) { (error) in
-            if let error = error {
-                print(error)
-            }
-        }
-    }
-    
     func issuePushNotification() {
         let content = UNMutableNotificationContent()
         content.body = "You are now at " + self.name

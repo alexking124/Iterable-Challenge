@@ -11,20 +11,13 @@ import RealmSwift
 import UIKit
 import UserNotifications
 
-struct Platform {
-    static var isSimulator: Bool {
-        return TARGET_OS_SIMULATOR != 0
-    }
-}
-
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
     let locationManager = CLLocationManager()
-    var regionFetcher: RegionFetcher?
-    var realmNotification: NotificationToken?
+    private var regionFetcher: RegionFetcher?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -65,36 +58,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         center.removeAllPendingNotificationRequests()
         
-        if Platform.isSimulator {
-            self.registerRealmUpdates()
-        }
-        
+        return true
+    }
+    
+    func beginFetch() {
         let mapper = RegionMapper()
         let regionFetcher = RegionFetcher(withRegionMapper: mapper)
         regionFetcher.fetchRegions()
         self.regionFetcher = regionFetcher
-        
-        return true
     }
     
-    func registerRealmUpdates() {
-        let realm = try! Realm()
-        
-        let regionObjects = realm.objects(Region.self)
-        self.realmNotification = regionObjects.addNotificationBlock { (change) in
-            switch change {
-            case.update(let changes, deletions: _, insertions: _, modifications: _):
-                print(changes)
-                for region in changes {
-                    self.locationManager.startMonitoring(for: region.circularRegionRepresentation)
-                }
-                break
-            default:
-                break
-            }
-        }
-    }
-
 }
 
 extension AppDelegate: CLLocationManagerDelegate {
@@ -121,6 +94,7 @@ extension AppDelegate: CLLocationManagerDelegate {
             return
         }
         
+        self.beginFetch()
     }
     
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
@@ -132,7 +106,6 @@ extension AppDelegate: CLLocationManagerDelegate {
             realmRegion.issuePushNotification()
         }
     }
-    
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {

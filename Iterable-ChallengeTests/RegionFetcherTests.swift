@@ -29,7 +29,9 @@ class RegionFetcherTests: XCTestCase {
     
     func testFetchRegions() {
         let realm = try! Realm()
-        realm.deleteAll()
+        try! realm.write {
+            realm.deleteAll()
+        }
         
         self.subject.fetchRegions()
         

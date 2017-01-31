@@ -126,8 +126,8 @@
 				39C14F261E3940DF009CE1A0 /* AppDelegateTests.swift */,
 				39C14F391E3DA764009CE1A0 /* RegionTests.swift */,
 				39149AD01E401FBC0064D0BD /* RegionFetcherTests.swift */,
-				39C14F281E3940DF009CE1A0 /* Info.plist */,
 				39149AD21E4023A50064D0BD /* RegionMapperTests.swift */,
+				39C14F281E3940DF009CE1A0 /* Info.plist */,
 			);
 			path = "Iterable-ChallengeTests";
 			sourceTree = "<group>";

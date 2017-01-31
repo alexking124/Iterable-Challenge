@@ -6,6 +6,7 @@
 //  Copyright © 2017 Alex King. All rights reserved.
 //
 
+import CoreLocation
 import Foundation
 import RealmSwift
 
@@ -38,6 +39,7 @@ class RegionFetcher: AnyObject {
                 return
             }
             
+            let locationManager = CLLocationManager()
             let realm = try! Realm()
             for regionJSON in jsonData {
                 guard let region = self.mapper.map(fromJSON: regionJSON) else {
@@ -47,9 +49,8 @@ class RegionFetcher: AnyObject {
                 try! realm.write {
                     realm.add(region, update: true)
                 }
-                if !Platform.isSimulator {
-                    region.registerForLocationTriggeredNotification()
-                }
+                
+                locationManager.startMonitoring(for: region.circularRegionRepresentation)
             }
         }.resume()
     }

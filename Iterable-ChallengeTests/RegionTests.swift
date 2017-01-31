@@ -30,25 +30,6 @@ class RegionTests: XCTestCase {
         super.tearDown()
     }
     
-    func testregisterForLocationTriggeredNotification() {
-        let center = UNUserNotificationCenter.current()
-        center.removeAllPendingNotificationRequests()
-        
-        self.subject.registerForLocationTriggeredNotification()
-        
-        let expect = expectation(description: "Registered a notification")
-        center.getPendingNotificationRequests { requests in
-            XCTAssertTrue(requests.count == 1)
-            expect.fulfill()
-        }
-        
-        waitForExpectations(timeout: 5.0) { (error) in
-            if let error = error {
-                print(error)
-            }
-        }
-    }
-    
     func testIssuePushNotification() {
         self.subject.issuePushNotification()
         

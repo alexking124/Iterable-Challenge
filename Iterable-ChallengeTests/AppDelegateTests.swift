@@ -8,6 +8,7 @@
 
 
 import RealmSwift
+import UserNotifications
 import XCTest
 
 @testable import Iterable_Challenge
@@ -26,11 +27,6 @@ class AppDelegateTests: XCTestCase {
         super.tearDown()
     }
     
-    func testLocationManagerAuthorizationStatus() {
-        _ = self.subject.application(UIApplication.shared, didFinishLaunchingWithOptions: nil)
-        
-    }
-    
     func testRegionEnteredNotificationDelivery() {
         let region = Region()
         region.id = "15"
@@ -44,10 +40,29 @@ class AppDelegateTests: XCTestCase {
             realm.add(region)
         }
         
-//        self.subject.registerRealmUpdates()
-        
         let circularRegion = region.circularRegionRepresentation
         self.subject.locationManager(self.subject.locationManager, didEnterRegion: circularRegion)
+        
+        let pushExpectation = expectation(description: "Push notification delivered")
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5) {
+            UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
+                var receivedNotification = false
+                for notification in notifications {
+                    if notification.request.identifier == "RegionEntered" {
+                        receivedNotification = true
+                        break
+                    }
+                }
+                XCTAssertTrue(receivedNotification)
+                pushExpectation.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 10.0) { (error) in
+            if let error = error {
+                print(error)
+            }
+        }
     }
     
 }
