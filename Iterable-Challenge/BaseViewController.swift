@@ -15,6 +15,7 @@ class BaseViewController: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     
     var realmNotification: NotificationToken?
+    var updatedLocation = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +24,7 @@ class BaseViewController: UIViewController {
         mapView.isPitchEnabled = false
         mapView.isRotateEnabled = false
         mapView.delegate = self
-
+        
         self.getRealmUpdates()
     }
     
@@ -34,7 +35,6 @@ class BaseViewController: UIViewController {
         self.realmNotification = regionObjects.addNotificationBlock { (change) in
             switch change {
             case .update(let regions, _, let insertions, let modifications):
-//                print(regions)
                 for index in insertions+modifications {
                     let region = regions[index]
                     self.mapView.add(MKCircle(center: region.coordinate, radius: region.radius), level:MKOverlayLevel.aboveLabels)
@@ -51,14 +51,20 @@ class BaseViewController: UIViewController {
 extension BaseViewController: MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-        
+        if updatedLocation == false {
+            let camera = mapView.camera
+            camera.centerCoordinate = mapView.userLocation.coordinate
+            camera.altitude = 70000
+            mapView.setCamera(camera, animated: true)
+            updatedLocation = true
+        }
     }
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         let renderer = MKCircleRenderer(overlay: overlay)
         renderer.lineWidth = 1.0
-        renderer.strokeColor = .blue
-        renderer.fillColor = UIColor.blue.withAlphaComponent(0.4)
+        renderer.strokeColor = .orange
+        renderer.fillColor = UIColor.orange.withAlphaComponent(0.4)
         return renderer
     }
     
