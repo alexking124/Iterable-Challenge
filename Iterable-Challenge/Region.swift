@@ -26,11 +26,28 @@ class Region: Object {
     var circularRegionRepresentation: CLCircularRegion {
         let region = CLCircularRegion(center: self.coordinate, radius: self.radius, identifier: self.id)
         region.notifyOnEntry = true
+        region.notifyOnExit = false
         return region
     }
     
     override static func primaryKey() -> String {
         return "id"
+    }
+    
+    func registerForLocationTriggeredNotification() {
+        let content = UNMutableNotificationContent()
+        content.body = "You are now at " + self.name
+        content.sound = UNNotificationSound.default()
+        
+        let trigger = UNLocationNotificationTrigger(region: self.circularRegionRepresentation, repeats: true)
+        
+        let notification = UNNotificationRequest(identifier: self.id, content: content, trigger: trigger)
+        let center = UNUserNotificationCenter.current()
+        center.add(notification) { (error) in
+            if let error = error {
+                print(error)
+            }
+        }
     }
     
     func issuePushNotification() {

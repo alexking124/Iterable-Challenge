@@ -44,7 +44,7 @@ class AppDelegateTests: XCTestCase {
             realm.add(region)
         }
         
-        self.subject.registerRealmUpdates()
+//        self.subject.registerRealmUpdates()
         
         let circularRegion = region.circularRegionRepresentation
         self.subject.locationManager(self.subject.locationManager, didEnterRegion: circularRegion)

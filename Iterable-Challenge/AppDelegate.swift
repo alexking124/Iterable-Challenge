@@ -11,6 +11,12 @@ import RealmSwift
 import UIKit
 import UserNotifications
 
+struct Platform {
+    static var isSimulator: Bool {
+        return TARGET_OS_SIMULATOR != 0
+    }
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -30,13 +36,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window = window
         
         locationManager.delegate = self
-        locationManager.requestAlwaysAuthorization()
         
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         center.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
             // Enable or disable features based on authorization
             if granted {
+                self.locationManager.requestAlwaysAuthorization()
                 return
             }
             print("Notification authorization error! \(error)")
@@ -59,7 +65,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         center.removeAllPendingNotificationRequests()
         
-        self.registerRealmUpdates()
+        if Platform.isSimulator {
+            self.registerRealmUpdates()
+        }
+        
         let mapper = RegionMapper()
         let regionFetcher = RegionFetcher(withRegionMapper: mapper)
         regionFetcher.fetchRegions()
@@ -74,12 +83,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let regionObjects = realm.objects(Region.self)
         self.realmNotification = regionObjects.addNotificationBlock { (change) in
             switch change {
-            case .initial(let regions):
-                print(regions)
-                for region in regions {
-                    self.locationManager.startMonitoring(for: region.circularRegionRepresentation)
-                }
-                break
             case.update(let changes, deletions: _, insertions: _, modifications: _):
                 print(changes)
                 for region in changes {
@@ -97,6 +100,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .notDetermined {
+            return
+        }
         if status != .authorizedAlways {
             print("Location authorization error! Current authorization status: \(status.rawValue)")
             
@@ -132,7 +138,7 @@ extension AppDelegate: CLLocationManagerDelegate {
 extension AppDelegate: UNUserNotificationCenterDelegate {
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler(.alert)
+        completionHandler([.alert , .sound])
     }
     
 }

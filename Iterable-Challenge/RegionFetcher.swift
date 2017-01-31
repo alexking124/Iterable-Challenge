@@ -17,6 +17,7 @@ class RegionFetcher: AnyObject {
     
     init(withRegionMapper mapper: RegionMapper) {
         self.mapper = mapper
+        URLSession.shared.configuration.requestCachePolicy = .reloadIgnoringCacheData
     }
     
     func fetchRegions() {
@@ -45,6 +46,9 @@ class RegionFetcher: AnyObject {
                 
                 try! realm.write {
                     realm.add(region, update: true)
+                }
+                if !Platform.isSimulator {
+                    region.registerForLocationTriggeredNotification()
                 }
             }
         }.resume()
